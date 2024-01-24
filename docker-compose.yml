@@ -1,0 +1,93 @@
+version: '3.8'
+services:
+  db_shard_1:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: test_shard_1
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Napoleon1703
+      POSTGRES_MAX_CONNECTIONS: 200
+      POSTGRES_MAX_WAL_SIZE: 1GB
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+  db_shard_2:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: test_shard_2
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Napoleon1703
+      POSTGRES_MAX_CONNECTIONS: 200
+      POSTGRES_MAX_WAL_SIZE: 1GB
+    ports:
+      - "5433:5432"
+    networks:
+      - app-network
+
+  db_shard_3:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: test_shard_3
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Napoleon1703
+      POSTGRES_MAX_CONNECTIONS: 200
+      POSTGRES_MAX_WAL_SIZE: 1GB
+    ports:
+      - "5434:5432"
+    networks:
+      - app-network
+
+  db_shard_4:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: test_shard_4
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Napoleon1703
+      POSTGRES_MAX_CONNECTIONS: 200
+      POSTGRES_MAX_WAL_SIZE: 1GB
+    ports:
+      - "5435:5432"
+    networks:
+      - app-network
+
+  db_shard_5:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: test_shard_5
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Napoleon1703
+      POSTGRES_MAX_CONNECTIONS: 200
+      POSTGRES_MAX_WAL_SIZE: 1GB
+    ports:
+      - "5436:5432"
+    networks:
+      - app-network      
+
+  app:
+    build: .
+    deploy:
+      replicas: 5  # Количество экземпляров
+    depends_on:
+      - db_shard_1
+      - db_shard_2
+      - db_shard_3
+      - db_shard_4
+      - db_shard_5
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app
+    networks:
+      - app-network
+
+networks:
+  app-network:
