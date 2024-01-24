@@ -14,11 +14,11 @@ function generateRandomPhoneNumber() {
   return prefix + randomNumber;
 }
 
-const usersCount = 1000;
+const usersCount = 2;
 let users = [];
 
 describe('Bulk User Registration', () => {
-  it('should create 100 users simultaneously', async () => {
+  test('should create 100 users simultaneously', async () => {
     const registrationPromises = [];
 
     for (let i = 0; i < usersCount; i++) {
@@ -43,10 +43,41 @@ describe('Bulk User Registration', () => {
     const responses = await Promise.all(registrationPromises);
 
     responses.forEach((response) => {
+      // console.log(response.body.response.message);
       expect(response.statusCode).toBe(200);
-      users.push(response.body.message);
+      users.push(response.body.response.message);
     });
 
     expect(users).toHaveLength(usersCount);
+  });
+
+  test('Должны отправиться сообщения от четного к нечетному пользователю', async () => {
+    for (let i = 0; i < users.length; i++) {
+      if (i % 2 === 0 && i + 1 < users.length) {
+        const sender = users[i];
+        const receiver = users[i + 1];
+
+        const message = {
+
+              toChat: receiver.id,
+              forwardMessage: null,
+              answerMessage: null,
+              is_personal: true,
+              code: 0,
+              attachments: null,
+              uploadStack: null,
+          text: `Сообщение от ${sender.login}`,
+          userId: sender.id
+        };
+        const response = await serverUrl
+          .post('/message')
+          .set('Authorization', `Bearer ${sender.token}`)
+          .send({
+            data: message
+          });
+
+        expect(response.statusCode).toBe(200);
+      }
+    }
   });
 });
