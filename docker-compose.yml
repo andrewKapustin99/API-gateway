@@ -6,7 +6,7 @@ services:
       POSTGRES_DB: test_shard_1
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: Napoleon1703
-      POSTGRES_MAX_CONNECTIONS: 200
+      POSTGRES_MAX_CONNECTIONS: 300
       POSTGRES_MAX_WAL_SIZE: 1GB
     ports:
       - "5432:5432"
@@ -19,7 +19,7 @@ services:
       POSTGRES_DB: test_shard_2
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: Napoleon1703
-      POSTGRES_MAX_CONNECTIONS: 200
+      POSTGRES_MAX_CONNECTIONS: 300
       POSTGRES_MAX_WAL_SIZE: 1GB
     ports:
       - "5433:5432"
@@ -32,7 +32,7 @@ services:
       POSTGRES_DB: test_shard_3
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: Napoleon1703
-      POSTGRES_MAX_CONNECTIONS: 200
+      POSTGRES_MAX_CONNECTIONS: 300
       POSTGRES_MAX_WAL_SIZE: 1GB
     ports:
       - "5434:5432"
@@ -45,7 +45,7 @@ services:
       POSTGRES_DB: test_shard_4
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: Napoleon1703
-      POSTGRES_MAX_CONNECTIONS: 200
+      POSTGRES_MAX_CONNECTIONS: 300
       POSTGRES_MAX_WAL_SIZE: 1GB
     ports:
       - "5435:5432"
@@ -58,17 +58,56 @@ services:
       POSTGRES_DB: test_shard_5
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: Napoleon1703
-      POSTGRES_MAX_CONNECTIONS: 200
+      POSTGRES_MAX_CONNECTIONS: 300
       POSTGRES_MAX_WAL_SIZE: 1GB
     ports:
       - "5436:5432"
     networks:
       - app-network      
 
+  db_shard_6:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: test_shard_6
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Napoleon1703
+      POSTGRES_MAX_CONNECTIONS: 300
+      POSTGRES_MAX_WAL_SIZE: 1GB
+    ports:
+      - "5437:5432"
+    networks:
+      - app-network   
+
+  db_shard_7:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: test_shard_7
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Napoleon1703
+      POSTGRES_MAX_CONNECTIONS: 300
+      POSTGRES_MAX_WAL_SIZE: 1GB
+    ports:
+      - "5438:5432"
+    networks:
+      - app-network   
+  
+  db_shard_8:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: test_shard_8
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Napoleon1703
+      POSTGRES_MAX_CONNECTIONS: 300
+      POSTGRES_MAX_WAL_SIZE: 1GB
+    ports:
+      - "5439:5432"
+    networks:
+      - app-network   
+
   app:
     build: .
     deploy:
-      replicas: 5  # Количество экземпляров
+      replicas: 8  # Количество экземпляров
     depends_on:
       - db_shard_1
       - db_shard_2
@@ -89,5 +128,17 @@ services:
     networks:
       - app-network
 
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@example.com"  # Замените на ваш email для входа в pgAdmin
+      PGADMIN_DEFAULT_PASSWORD: "admin"  # Замените на ваш пароль для входа в pgAdmin
+    ports:
+      - "5050:80"  # pgAdmin будет доступен на http://localhost:5050
+    networks:
+      - app-network
+    restart: unless-stopped
+
 networks:
   app-network:
+    driver: bridge

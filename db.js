@@ -5,7 +5,7 @@ const shard1 = new Sequelize(
   {
     logging: false,
     pool: {
-      max: 30,
+      max: 10,
       min: 0,
       acquire: 30000,
       idle: 10000,
@@ -13,11 +13,11 @@ const shard1 = new Sequelize(
   }
 );
 const shard2 = new Sequelize(
-  "postgres://postgres:Napoleon1703@db_shard_2:5433/test_shard_2",
+  "postgres://postgres:Napoleon1703@db_shard_2:5432/test_shard_2",
   {
     logging: false,
     pool: {
-      max: 30,
+      max: 10,
       min: 0,
       acquire: 30000,
       idle: 10000,
@@ -25,11 +25,11 @@ const shard2 = new Sequelize(
   }
 );
 const shard3 = new Sequelize(
-  "postgres://postgres:Napoleon1703@db_shard_3:5434/test_shard_3",
+  "postgres://postgres:Napoleon1703@db_shard_3:5432/test_shard_3",
   {
     logging: false,
     pool: {
-      max: 30,
+      max: 10,
       min: 0,
       acquire: 30000,
       idle: 10000,
@@ -38,11 +38,11 @@ const shard3 = new Sequelize(
 );
 
 const shard4 = new Sequelize(
-  "postgres://postgres:Napoleon1703@db_shard_4:5435/test_shard_4",
+  "postgres://postgres:Napoleon1703@db_shard_4:5432/test_shard_4",
   {
     logging: false,
     pool: {
-      max: 30,
+      max: 10,
       min: 0,
       acquire: 30000,
       idle: 10000,
@@ -51,11 +51,11 @@ const shard4 = new Sequelize(
 );
 
 const shard5 = new Sequelize(
-  "postgres://postgres:Napoleon1703@db_shard_5:5436/test_shard_5",
+  "postgres://postgres:Napoleon1703@db_shard_5:5432/test_shard_5",
   {
     logging: false,
     pool: {
-      max: 30,
+      max: 10,
       min: 0,
       acquire: 30000,
       idle: 10000,
@@ -63,10 +63,58 @@ const shard5 = new Sequelize(
   }
 );
 
-const shards = { shard1, shard2, shard3, shard4, shard5 };
+const shard6 = new Sequelize(
+  "postgres://postgres:Napoleon1703@db_shard_6:5432/test_shard_6",
+  {
+    logging: false,
+    pool: {
+      max: 10,
+      min: 0,
+      acquire: 30000,
+      idle: 10000,
+    },
+  }
+);
+
+const shard7 = new Sequelize(
+  "postgres://postgres:Napoleon1703@db_shard_7:5432/test_shard_7",
+  {
+    logging: false,
+    pool: {
+      max: 10,
+      min: 0,
+      acquire: 30000,
+      idle: 10000,
+    },
+  }
+);
+
+const shard8 = new Sequelize(
+  "postgres://postgres:Napoleon1703@db_shard_8:5432/test_shard_8",
+  {
+    logging: false,
+    pool: {
+      max: 10,
+      min: 0,
+      acquire: 30000,
+      idle: 10000,
+    },
+  }
+);
+
+const shards = {
+  shard1,
+  shard2,
+  shard3,
+  shard4,
+  shard5,
+  shard6,
+  shard7,
+  shard8,
+};
 
 function selectShard(userId) {
-  const shardIndex = userId % 5;
+  const shardIndex = userId % 8;
   switch (shardIndex) {
     case 0:
       return shards.shard1;
@@ -78,6 +126,12 @@ function selectShard(userId) {
       return shards.shard4;
     case 4:
       return shards.shard5;
+    case 5:
+      return shards.shard6;
+    case 6:
+      return shards.shard7;
+    case 7:
+      return shards.shard8;
     default:
       return shards.shard1;
   }
@@ -85,39 +139,39 @@ function selectShard(userId) {
 
 Object.values(shards).forEach((shard) => {
   const Attachment = shard.define(
-    'attachment',
-  {
-    id: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      primaryKey: true,
+    "attachment",
+    {
+      id: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        primaryKey: true,
 
-      defaultValue: DataTypes.UUIDV4,
-    },
-    message_id: {
-      type: DataTypes.INTEGER,
-    },
+        defaultValue: DataTypes.UUIDV4,
+      },
+      message_id: {
+        type: DataTypes.INTEGER,
+      },
 
-    user_id: {
-      type: DataTypes.UUID,
-    },
+      user_id: {
+        type: DataTypes.UUID,
+      },
 
-    file_id: {
-      type: DataTypes.UUID,
+      file_id: {
+        type: DataTypes.UUID,
+      },
+      originalFilePath: {
+        type: DataTypes.STRING(256),
+        allowNull: true,
+      },
+      encupsFile: {
+        type: DataTypes.STRING(256),
+        allowNull: true,
+      },
     },
-    originalFilePath: {
-      type: DataTypes.STRING(256),
-      allowNull: true,
-    },
-    encupsFile: {
-      type: DataTypes.STRING(256),
-      allowNull: true,
-    },
-  },
-  {
-    timestamps: false,
-  }
-  )
+    {
+      timestamps: false,
+    }
+  );
 
   const User = shard.define(
     "User",
@@ -390,7 +444,9 @@ Object.values(shards).forEach((shard) => {
         defaultValue: "",
       },
     },
+
     {
+      tableName: "UserMessages",
       timestamps: false,
     }
   );
@@ -426,8 +482,8 @@ Object.values(shards).forEach((shard) => {
   Encrypt.belongsTo(User, { foreignKey: "user_id" });
   User.hasOne(Encrypt, { foreignKey: "user_id" });
 
-  Attachment.belongsTo(UserMessage, { foreignKey: 'message_id' });
-  UserMessage.hasMany(Attachment, { foreignKey: 'message_id' });
+  Attachment.belongsTo(UserMessage, { foreignKey: "message_id" });
+  UserMessage.hasMany(Attachment, { foreignKey: "message_id" });
 
   UserMessage.belongsTo(User, { foreignKey: "user_id" });
   UserReadMessageMtm.belongsTo(UserMessage, { foreignKey: "message_id" });

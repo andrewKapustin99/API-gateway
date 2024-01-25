@@ -21,6 +21,7 @@ async function createUser(userData, shard) {
 
 
 async function addMessageToPersonalChat(
+  shard,
   contactId,
   forwardMessage,
   answerMessageId,
@@ -29,10 +30,7 @@ async function addMessageToPersonalChat(
   user_id
 ) {
   try {
-    console.log('addMessageToPersonalChat START !!!!!!!!!!!!');
     const user = await shard.model('User').findByPk(user_id);
-
-    console.log("My USER !!!!!!!!!!!!!!!!!!", user);
 
     if (!user) {
       throw { code: 403, message: 'Пользователь не был найден' };
@@ -44,6 +42,7 @@ async function addMessageToPersonalChat(
     });
 
     let answerMessage = null;
+
 
     const findUser = await shard.model('User').findByPk(user_id, {
       attributes: ['id', 'phone'],
@@ -62,7 +61,7 @@ async function addMessageToPersonalChat(
 
     if (attachments !== null && attachments.length !== 0) {
       for (const { id } of attachments) {
-        const file = await File.findOne({
+        const file = await shard.model('File').findOne({
           where: { id },
         });
 

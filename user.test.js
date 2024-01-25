@@ -14,7 +14,7 @@ function generateRandomPhoneNumber() {
   return prefix + randomNumber;
 }
 
-const usersCount = 2;
+const usersCount = 1000;
 let users = [];
 
 describe('Bulk User Registration', () => {
